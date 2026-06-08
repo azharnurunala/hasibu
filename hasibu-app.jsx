@@ -17,6 +17,7 @@ function App() {
   const [loginErr, setLoginErr] = useState('');
   const [tab, setTab] = useState('home');
   const [form, setForm] = useState(null); // {year,month,pekan}
+  const [celebrate, setCelebrate] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const period = useMemo(() => H.currentPeriod(new Date()), []);
@@ -65,7 +66,13 @@ function App() {
   function openPekan(month, pekan, year) {
     setForm({ year: year || period.year, month, pekan });
   }
-  function formDone() { setForm(null); setRefreshKey((k) => k + 1); setTab('home'); }
+  function formDone(result) {
+    setForm(null);
+    if (result) setCelebrate(result); else { setRefreshKey((k) => k + 1); setTab('home'); }
+  }
+  function closeCelebrate() {
+    setCelebrate(null); setRefreshKey((k) => k + 1); setTab('home');
+  }
 
   // splash saat status auth belum siap
   if (!authReady) {
@@ -90,6 +97,17 @@ function App() {
       <div className="app" data-tema={t.tema} style={rootStyle}>
         <div className="phone">
           <FormScreen user={user} {...form} onDone={formDone} onCancel={() => setForm(null)} />
+        </div>
+        <HasibuTweaks t={t} setTweak={setTweak} />
+      </div>
+    );
+  }
+
+  if (celebrate) {
+    return (
+      <div className="app" data-tema={t.tema} style={rootStyle}>
+        <div className="phone">
+          <Celebration result={celebrate} onClose={closeCelebrate} />
         </div>
         <HasibuTweaks t={t} setTweak={setTweak} />
       </div>

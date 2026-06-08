@@ -18,9 +18,11 @@ window.HASIBU_FIREBASE_CONFIG = {
   appId: "1:484112357632:web:193afc6ffdd3bfbd03bbe5",
 };
 
-/* Aktif kalau konfigurasi sudah benar-benar diisi (bukan placeholder). */
+/* Aktif kalau konfigurasi sudah benar-benar diisi (bukan placeholder).
+ * Tambahkan ?demo=1 di URL untuk memaksa mode demo (mencoba tampilan tanpa login). */
 window.HASIBU_FIREBASE_ENABLED = (function () {
   try {
+    if (location.search.indexOf('demo=1') !== -1) return false;
     var c = window.HASIBU_FIREBASE_CONFIG || {};
     return Object.values(c).every(function (v) {
       return typeof v === "string" && v && v.indexOf("PASTE_") === -1;

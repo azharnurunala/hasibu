@@ -213,10 +213,36 @@
     return Math.round((got / max) * 100);
   }
 
+  // ---- Streak (pekan beruntun terisi sampai sekarang) ----
+  // bikin daftar kronologis pekan dari ~18 bulan ke belakang sampai periode kini
+  function weekSequence(period) {
+    const arr = [];
+    const ym = period.year * 12 + period.month;
+    for (let k = ym - 18; k <= ym; k++) {
+      const yy = Math.floor(k / 12), mm = ((k % 12) + 12) % 12;
+      weeksOfMonth(yy, mm).forEach((w) => arr.push({ year: yy, month: mm, pekan: w.pekan }));
+    }
+    return arr;
+  }
+  function computeStreak(uid, period) {
+    const seq = weekSequence(period);
+    let idx = seq.findIndex((w) => w.year === period.year && w.month === period.month && w.pekan === period.pekan);
+    if (idx < 0) idx = seq.length - 1;
+    let i = idx;
+    // pekan ini boleh belum diisi tanpa memutus streak — mulai hitung dari pekan terisi terakhir
+    if (!getEntry(uid, seq[i].year, seq[i].month, seq[i].pekan)) i--;
+    let streak = 0;
+    for (; i >= 0; i--) {
+      const w = seq[i];
+      if (getEntry(uid, w.year, w.month, w.pekan)) streak++; else break;
+    }
+    return streak;
+  }
+
   window.HASIBU = {
     NS, BULAN, BULAN_PENDEK, HARI, AMALAN, IBR, TONE_SCORE, TONE_LABEL,
     firstSundayDate, weeksOfMonth, currentPeriod, fmtDate, rangeLabel,
-    userKey, entryId, loadEntries, saveEntry, getEntry, clearAll, entryScore,
+    userKey, entryId, loadEntries, saveEntry, getEntry, clearAll, entryScore, computeStreak,
     cloudEnabled, isDemo, onAuth, signInGoogle, signOutUser, pull, push,
   };
 })();

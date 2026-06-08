@@ -45,30 +45,40 @@ function LoginScreen({ onGoogle, busy, error }) {
 function HomeScreen({ user, period, onOpenPekan, refreshKey }) {
   const H = window.HASIBU;
   const weeks = H.weeksOfMonth(period.year, period.month);
-  const greeting = (() => {
-    const h = new Date().getHours();
-    if (h < 11) return 'Selamat pagi';
-    if (h < 15) return 'Selamat siang';
-    if (h < 19) return 'Selamat sore';
-    return 'Selamat malam';
-  })();
+  const hour = new Date().getHours();
+  const greeting = hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 19 ? 'Selamat sore' : 'Selamat malam';
+  const emoji = hour < 11 ? '🌅' : hour < 15 ? '☀️' : hour < 19 ? '🌇' : '🌙';
   const sapaan = user.nama ? user.nama.split(' ')[0] : (user.email ? user.email.split('@')[0] : 'Sahabat');
 
   const thisEntry = H.getEntry(user.uid, period.year, period.month, period.pekan);
   const thisScore = H.entryScore(thisEntry);
   const filledCount = weeks.filter((w) => H.getEntry(user.uid, period.year, period.month, w.pekan)).length;
+  const streak = H.computeStreak(user.uid, period);
+
+  const tagline = thisEntry
+    ? 'Pekan ini sudah beres. Barakallah ✨'
+    : (streak > 0 ? `Jaga ${streak} pekan beruntunmu — isi pekan ini 🔥` : 'Yuk mulai catat amalan pekan ini.');
 
   return (
     <div className="screen">
       <header className="home-hd">
-        <div>
-          <div className="home-greet">{greeting},</div>
+        <div className="home-hd-l">
+          <div className="home-greet">{greeting} {emoji}</div>
           <div className="home-name">{sapaan}</div>
         </div>
-        {user.foto
-          ? <img className="home-av" src={user.foto} alt="" referrerPolicy="no-referrer" />
-          : <div className="home-av home-av-letter">{sapaan.slice(0, 1).toUpperCase()}</div>}
+        <div className="home-hd-r">
+          {streak > 0 && (
+            <div className="streak" title={`${streak} pekan beruntun`}>
+              <HIcon.flame width="15" height="15" /><span>{streak}</span>
+            </div>
+          )}
+          {user.foto
+            ? <img className="home-av" src={user.foto} alt="" referrerPolicy="no-referrer" />
+            : <div className="home-av home-av-letter">{sapaan.slice(0, 1).toUpperCase()}</div>}
+        </div>
       </header>
+
+      <p className="home-tagline">{tagline}</p>
 
       {/* Kartu pekan ini */}
       <section className="card hero" onClick={() => onOpenPekan(period.month, period.pekan)}>
@@ -149,7 +159,9 @@ function FormScreen({ user, year, month, pekan, onDone, onCancel }) {
     setSaving(true);
     await H.saveEntry(user.uid, entry);
     setSaving(false);
-    onDone();
+    const score = H.entryScore(entry);
+    const streak = H.computeStreak(user.uid, { year, month, pekan });
+    onDone({ score, streak, pekan, month, isNew: !existing });
   }
 
   return (
@@ -346,6 +358,39 @@ function ProfileScreen({ user, onLogout, onReset }) {
   );
 }
 
+/* ============ CELEBRATION ============ */
+function Celebration({ result, onClose }) {
+  const H = window.HASIBU;
+  const ref = useRef(null);
+  const { score, streak, pekan, month } = result;
+  const verdict = score >= 80 ? 'Masya Allah, luar biasa!' : score >= 55 ? 'Alhamdulillah, mantap!' : 'Tetap istiqamah, semangat!';
+
+  useEffect(() => {
+    const host = ref.current;
+    const t1 = setTimeout(() => window.fireConfetti({ host, originY: host ? host.getBoundingClientRect().height * 0.32 : 200 }), 120);
+    const t2 = setTimeout(() => window.fireConfetti({ host, count: 70, originY: host ? host.getBoundingClientRect().height * 0.3 : 180 }), 650);
+    window.haptic(24);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  return (
+    <div className="celebrate" ref={ref}>
+      <div className="celebrate-inner">
+        <div className="celebrate-badge"><HIcon.check width="40" height="40" /></div>
+        <div className="celebrate-kicker">Pekan {pekan} · {H.BULAN[month]} tersimpan</div>
+        <h2 className="celebrate-title">{verdict}</h2>
+        <div className="celebrate-ring"><ScoreRing value={score} size={132} stroke={12} /></div>
+        {streak > 1 && (
+          <div className="celebrate-streak">
+            <HIcon.flame width="18" height="18" /><b>{streak}</b> pekan beruntun
+          </div>
+        )}
+        <button className="btn-primary block celebrate-btn" onClick={onClose}>Lanjut<HIcon.chevron /></button>
+      </div>
+    </div>
+  );
+}
+
 Object.assign(window, {
-  LoginScreen, HomeScreen, FormScreen, HistoryScreen, ProgressScreen, ProfileScreen,
+  LoginScreen, HomeScreen, FormScreen, HistoryScreen, ProgressScreen, ProfileScreen, Celebration,
 });
