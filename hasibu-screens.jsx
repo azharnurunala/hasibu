@@ -12,13 +12,12 @@ function LoginScreen({ onGoogle, busy, error }) {
           <div className="brand-mark"><HIcon.spark width="20" height="20" /></div>
           <div className="brand-name">Hasibu</div>
         </div>
-        <h1 className="login-title">Mutaba'ah<br />Yaumiyah</h1>
-        <p className="login-sub">Catat amalan harianmu tiap pekan. Tenang, pribadi, dan terukur.</p>
+        <h1 className="login-title">Amal<br />Tracker</h1>
+        <p className="login-sub">Mencatat amalan harian tak pernah semudah ini.</p>
       </div>
 
       <div className="login-card">
         <div className="login-feats">
-          <div className="login-feat"><HIcon.check width="17" height="17" /><span>Tersimpan aman di akun Google-mu</span></div>
           <div className="login-feat"><HIcon.check width="17" height="17" /><span>Sinkron otomatis di HP &amp; laptop</span></div>
           <div className="login-feat"><HIcon.check width="17" height="17" /><span>Hanya kamu yang melihat catatanmu</span></div>
         </div>
@@ -30,12 +29,6 @@ function LoginScreen({ onGoogle, busy, error }) {
             ? <><HIcon.spinner width="20" height="20" />Menghubungkan…</>
             : <><HIcon.google width="20" height="20" />Lanjutkan dengan Google</>}
         </button>
-
-        <p className="login-note">
-          {demo
-            ? 'Mode demo — login disimulasikan & data tersimpan di perangkat ini. Setelah dihubungkan ke Firebase, login Google asli & sinkronisasi aktif.'
-            : 'Dengan masuk, kamu setuju menyimpan catatan mutaba\u2019ah di akun Google-mu.'}
-        </p>
       </div>
     </div>
   );

@@ -194,8 +194,8 @@ function ColorChoice({ amalan, value, onChange }) {
           <button key={t} type="button" className="choice" data-tone={t}
             aria-pressed={value === t} data-on={value === t}
             onClick={() => { haptic(value === t ? 6 : 12); onChange(value === t ? null : t); }}>
-            <span className="choice-tone">{H.TONE_LABEL[t]}</span>
             <span className="choice-crit">{amalan.levels[t]}</span>
+            <span className="choice-tone">{H.TONE_LABEL[t]}</span>
             <span className="choice-tick"><Icon.check width="15" height="15" /></span>
           </button>
         ))}
